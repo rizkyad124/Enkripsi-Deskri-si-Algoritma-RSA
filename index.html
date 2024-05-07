@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enkripsi Deskripsi Algoritma RSA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin-top: 50px; 
+            margin-bottom: 50px;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0px 10px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            max-width: 500px;
+            margin: auto;
+            font-weight: bold;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 0px;
+        }
+
+        label {
+            margin-top: 0px;
+            color: #555;
+            margin-bottom: 0px;
+        }
+
+        select {
+            margin-top: 6px;
+            padding: 5px;
+            width: 20%;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+
+        button {
+            margin-top: 6px;
+            padding: 10px;
+            width: 70%;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            display: block; 
+            margin: 0 auto;
+            margin: 10px auto;
+        }
+
+        textarea {
+            margin-top: 6px;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 4px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enkripsi Deskripsi Algoritma RSA</h1>
+
+        <label>Pilih Peran:</label>
+        <select id="roleSelect" onchange="changeRole()">
+            <option value="sender">Pengirim</option>
+            <option value="receiver">Penerima</option>
+            <option value="owner">Pemilik</option>
+        </select><br>
+
+        <div id="senderSection">
+            <!-- Bagian untuk pengirim -->
+            <h3>Pengirim</h3>
+            <label>Masukkan Public Key:</label><br>
+            <textarea id="publicKeySender" rows="4" cols="50"></textarea><br>
+            <label>Masukkan teks yang akan di Enkripsi:</label><br>
+            <textarea id="inputTextSender" rows="4" cols="50"></textarea><br>
+            <button onclick="encrypt()">Enkripsi</button><br>
+            <label>Hasil Enkripsi:</label><br>
+            <textarea id="outputTextSender" rows="4" cols="50"></textarea><br>
+        </div>
+
+        <div id="receiverSection" style="display: none;">
+            <!-- Bagian untuk penerima -->
+            <h3>Penerima</h3>
+            <label>Masukkan Private Key:</label><br>
+            <textarea id="privateKeyReceiver" rows="4" cols="50"></textarea><br>
+            <label>Masukkan teks terenkripsi:</label><br>
+            <textarea id="inputTextReceiver" rows="4" cols="50"></textarea><br>
+            <button onclick="decrypt()">Deskripsi</button><br>
+            <label>Hasil Deskripsi:</label><br>
+            <textarea id="outputTextReceiver" rows="4" cols="50"></textarea>
+        </div>
+
+        <div id="ownerSection" style="display: none;">
+            <!-- Bagian untuk pemilik -->
+            <h3>Pemilik</h3>
+            <label>Masukkan/Generate Public Key:</label><br>
+            <textarea id="publicKeyOwner" rows="4" cols="50"></textarea><br>
+            <label>Masukkan/Generate Private Key:</label><br>
+            <textarea id="privateKeyOwner" rows="4" cols="50" readonly></textarea><br>
+            <button onclick="generateKeysOwner()">Generate Public & Private Key</button><br>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/2.3.1/jsencrypt.min.js"></script>
+    <script>
+        var currentRole = 'sender';
+
+        var changeRole = function() {
+            currentRole = document.getElementById('roleSelect').value;
+            if (currentRole === 'sender') {
+                document.getElementById('senderSection').style.display = 'block';
+                document.getElementById('receiverSection').style.display = 'none';
+                document.getElementById('ownerSection').style.display = 'none';
+                document.getElementById('senderSection').style.marginTop = '10px';
+                document.getElementById('receiverSection').style.marginTop = '10px';
+                document.getElementById('ownerSection').style.marginTop = '10px';
+            } else if (currentRole === 'receiver') {
+                document.getElementById('senderSection').style.display = 'none';
+                document.getElementById('receiverSection').style.display = 'block';
+                document.getElementById('ownerSection').style.display = 'none';
+                document.getElementById('senderSection').style.marginTop = '10px';
+                document.getElementById('receiverSection').style.marginTop = '10px';
+                document.getElementById('ownerSection').style.marginTop = '10px';
+            } else if (currentRole === 'owner') {
+                document.getElementById('senderSection').style.display = 'none';
+                document.getElementById('receiverSection').style.display = 'none';
+                document.getElementById('ownerSection').style.display = 'block';
+                document.getElementById('senderSection').style.marginTop = '10px';
+                document.getElementById('receiverSection').style.marginTop = '10px';
+                document.getElementById('ownerSection').style.marginTop = '10px';
+            }
+        }
+
+        var generateKeys = function() {
+            var button = document.querySelector('button');
+            button.innerHTML = 'Loading...';
+            button.disabled = true;
+
+            setTimeout(function() {
+                var crypt = new JSEncrypt({default_key_size: 2056});
+                crypt.getKey();
+                var publicKey = crypt.getPublicKey();
+                var privateKey = crypt.getPrivateKey();
+                document.getElementById('publicKeySender').value = publicKey;
+                document.getElementById('privateKeySender').value = privateKey;
+
+                button.innerHTML = 'Generate Public & Private Key success!';
+                button.style.backgroundColor = '#28a745'; 
+                button.disabled = false;
+            }, 2000); 
+        }
+
+        var generateKeysOwner = function() {
+            var button = document.getElementById('ownerSection').querySelector('button');
+            button.innerHTML = 'Loading...';
+            button.disabled = true;
+
+            setTimeout(function() {
+                var crypt = new JSEncrypt({default_key_size: 2056});
+                crypt.getKey();
+                var publicKey = crypt.getPublicKey();
+                var privateKey = crypt.getPrivateKey();
+                document.getElementById('publicKeyOwner').value = publicKey;
+                document.getElementById('privateKeyOwner').value = privateKey;
+
+                button.innerHTML = 'Generate Public & Private Key success!';
+                button.style.backgroundColor = '#28a745'; 
+                button.disabled = false;
+            }, 2000); 
+        }
+
+        var encrypt = function() {
+            if (currentRole === 'sender') {
+                var publicKey = document.getElementById('publicKeySender').value;
+                var inputText = document.getElementById('inputTextSender').value;
+
+                var crypt = new JSEncrypt();
+                crypt.setPublicKey(publicKey);
+                var encryptedText = crypt.encrypt(inputText);
+
+                document.getElementById('outputTextSender').value = encryptedText;
+            } else if (currentRole === 'owner') {
+                var publicKey = document.getElementById('publicKeyOwner').value;
+                var inputText = document.getElementById('inputTextOwner').value;
+
+                var crypt = new JSEncrypt();
+                crypt.setPublicKey(publicKey);
+                var encryptedText = crypt.encrypt(inputText);
+
+                document.getElementById('outputTextOwner').value = encryptedText;
+            } else {
+                
+            }
+        }
+
+        var decrypt = function() {
+            if (currentRole === 'sender') {
+                
+            } else if (currentRole === 'receiver') {
+                var privateKey = document.getElementById('privateKeyReceiver').value; // Mengambil kunci privat dari input
+                var encryptedText = document.getElementById('inputTextReceiver').value;
+
+                var crypt = new JSEncrypt();
+                crypt.setPrivateKey(privateKey);
+                var decryptedText = crypt.decrypt(encryptedText);
+
+                document.getElementById('outputTextReceiver').value = decryptedText;
+            } else if (currentRole === 'owner') {
+                
+            }
+        }
+    </script>
+</body>
+</html>
